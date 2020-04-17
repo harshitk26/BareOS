@@ -1,4 +1,4 @@
-#include "arm64/sysregs.h"
+#include "arm/sysregs.h"
 
 #include "mm.h"
 
