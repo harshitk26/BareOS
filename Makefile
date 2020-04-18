@@ -1,15 +1,18 @@
 ARMGNU ?= aarch64-linux-gnu
+ARCH = arm64
 
 CFLAGS = -Wall -O2 -ffreestanding -nostdinc -nostdlib -nostartfiles # -mgeneral-regs-only
 ASMOPS = -Iinclude 
 
+ARCH_DIR = arch/$(ARCH)
 BUILD_DIR = build
-FS = fs
-NET = net
-DRIVERS = drivers
-MM = mm
-ARCH = arm64
 SRC_DIR = kernel
+
+DRIVERS = $(SRC_DIR)/drivers
+FS = $(SRC_DIR)/fs
+MM = $(SRC_DIR)/mm
+NET = $(SRC_DIR)/net
+
 all : kernel8.img
 
 clean :
@@ -19,7 +22,7 @@ $(BUILD_DIR)/%_c.o: $(SRC_DIR)/%.c
 	mkdir -p $(@D)
 	$(ARMGNU)-gcc $(COPS) -MMD -c $< -o $@
 
-$(BUILD_DIR)/%_s.o: arch/$(ARCH)/%.S
+$(BUILD_DIR)/%_s.o: $(ARCH_DIR)/%.S
 	mkdir -p $(@D)
 	$(ARMGNU)-gcc $(ASMOPS) -MMD -c $< -o $@
 
@@ -28,12 +31,12 @@ $(BUILD_DIR)/%_s.o: $(MM)/%.S
 	$(ARMGNU)-gcc $(ASMOPS) -MMD -c $< -o $@
 
 
-C_FILES = $(wildcard $(SRC_DIR)/*.c)
-BOOT_FILES = $(wildcard arch/$(ARCH)/*.S)
+MAIN_FILES = $(wildcard $(SRC_DIR)/*.c)
+ARCH_FILES = $(wildcard arch/$(ARCH)/*.S)
 MM_FILES = $(wildcard $(MM)/*.S)
 
-OBJ_FILES = $(C_FILES:$(SRC_DIR)/%.c=$(BUILD_DIR)/%_c.o)
-OBJ_FILES += $(BOOT_FILES:arch/$(ARCH)/%.S=$(BUILD_DIR)/%_s.o)
+OBJ_FILES = $(MAIN_FILES:$(SRC_DIR)/%.c=$(BUILD_DIR)/%_c.o)
+OBJ_FILES += $(ARCH_FILES:$(ARCH_DIR)/%.S=$(BUILD_DIR)/%_s.o)
 OBJ_FILES += $(MM_FILES:$(MM)/%.S=$(BUILD_DIR)/%_s.o)
 
 DEP_FILES = $(OBJ_FILES:%.o=%.d)
